@@ -39,6 +39,7 @@ class Producer(Thread):
     def run(self):
         prod_id = self.marketplace.register_producer()
 
+        # Executes the associated publish operations in an infinite loop.
         while True:
             for product_info in self.products:
                 product, quantity, wait_time = product_info[0], product_info[1], product_info[2]

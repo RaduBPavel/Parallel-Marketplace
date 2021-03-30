@@ -31,6 +31,7 @@ class Consumer(Thread):
         :type kwargs:
         :param kwargs: other arguments that are passed to the Thread's __init__()
         """
+
         Thread.__init__(self, **kwargs)
         self.carts = carts
         self.marketplace = marketplace
@@ -39,11 +40,13 @@ class Consumer(Thread):
                             'remove': self.marketplace.remove_from_cart}
 
     def run(self):
+        # For each cart that the customer has, execute the associated operations.
         for cart in self.carts:
             cart_id = self.marketplace.new_cart()
 
             for action in cart:
-                action_type, product, quantity = action['type'], action['product'], action['quantity']
+                action_type = action['type']
+                product, quantity = action['product'], action['quantity']
 
                 while quantity > 0:
                     return_code = self.operations[action_type](cart_id, product)
@@ -53,5 +56,6 @@ class Consumer(Thread):
                     else:
                         time.sleep(self.retry_wait_time)
 
+            # After finishing the operations, print the contents of the cart.
             for item in self.marketplace.place_order(cart_id):
                 print('{} bought {}'.format(self.name, item))

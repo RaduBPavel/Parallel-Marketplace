@@ -20,11 +20,14 @@ class Marketplace:
         :type queue_size_per_producer: Int
         :param queue_size_per_producer: the maximum size of a queue associated with each producer
         """
+
+        # Used to store data regarding the products published and the carts of consumers
         self.queue_size_per_producer = queue_size_per_producer
         self.products = defaultdict(deque)
         self.queue_sizes = {}
         self.carts = {}
 
+        # Used for synchronizing the marketplace methods
         self.publish_lock = Lock()
         self.add_lock = Lock()
         self.remove_lock = Lock()
@@ -32,14 +35,18 @@ class Marketplace:
 
     def register_producer(self):
         """
+        Registers a producer in the marketplace.
+
         Returns an id for the producer that calls this.
         """
+
+        # No need for synchronization, as the = operation is atomic for dictionaries
         self.queue_sizes[len(self.queue_sizes)] = 0
         return len(self.queue_sizes) - 1
 
     def publish(self, producer_id, product):
         """
-        Adds the product provided by the producer to the marketplace
+        Adds the product provided by the producer with prod_id to the marketplace.
 
         :type producer_id: String
         :param producer_id: producer id
@@ -47,8 +54,10 @@ class Marketplace:
         :type product: Product
         :param product: the Product that will be published in the Marketplace
 
-        :returns True or False. If the caller receives False, it should wait and then try again.
+        :returns True or False, based on whether the producer has space to add items or not.
+        If the caller receives False, it should wait and then try again.
         """
+
         with self.publish_lock:
             if self.queue_sizes[producer_id] == self.queue_size_per_producer:
                 return False
@@ -61,12 +70,12 @@ class Marketplace:
 
     def new_cart(self):
         """
-        Creates a new cart for the consumer
+        Creates a new cart for the consumer.
 
         :returns an int representing the cart_id
         """
 
-        # No need for synchronization, as the following operation is atomic
+        # No need for synchronization, as the = operation is atomic for dictionaries
         self.carts[len(self.carts)] = defaultdict(deque)
         return len(self.carts) - 1
 
@@ -80,7 +89,8 @@ class Marketplace:
         :type product: Product
         :param product: the product to add to cart
 
-        :returns True or False. If the caller receives False, it should wait and then try again
+        :returns True or False, based on whether the product list has items or not.
+        If the caller receives False, it should wait and then try again.
         """
 
         with self.add_lock:
@@ -95,14 +105,18 @@ class Marketplace:
 
     def remove_from_cart(self, cart_id, product):
         """
-        Removes a product from cart.
+        Removes a product from the cart with the associated card_id.
 
         :type cart_id: Int
         :param cart_id: id cart
 
         :type product: Product
         :param product: the product to remove from cart
+
+        :returns True or False, based on whether the cart has the product or not.
+        If the caller receives False, it should wait and then try again.
         """
+
         with self.remove_lock:
             if not self.carts[cart_id][product]:
                 return False
@@ -115,11 +129,12 @@ class Marketplace:
 
     def place_order(self, cart_id):
         """
-        Return a list with all the products in the cart.
+        Return a list with all the products in the cart with the associated cart_id.
 
         :type cart_id: Int
         :param cart_id: id cart
         """
+
         with self.place_lock:
             result = []
 
