@@ -1,26 +1,37 @@
-# Arhitectura Sistemelor de calcul - Tema 1 - Marketplace, Martie 2021
+Name: Pavel Radu-Bogdan
+Group: 334CA
+Faculty: Faculty of Automatic Control and Computer Science, UPB
 
-# Enunt
-http://ocw.cs.pub.ro/courses/asc/teme/tema1
+# Assignment no. 1
+#### Parallel Marketplace
 
-# Testare
+***Assignment purpose***
+* The purpose of this assignment was to simulate the Multiple Producer Multiple Consumers (MPMC) scenario.
+* In order to simulate this scenario, the following context was given: the objective was to simulate how
+products are produced and sold in a marketplace, by multiple producers and multiple consumers at the same time.
 
+***Assignment structure***
+* The main logic of the assignment is implemented in three .py files: marketplace.py, consumer.py and producer.py
+* The marketplace, which acts as the broker between the producers and consumers, has all the logic implemented
+inside it, which consists of: registering producers and carts of consumers, publishing the products of producers
+and adding and removing products from user's carts.
+* The producer and consumer entities use the methods declared inside the Marketplace class to simulate their
+functionalities.
 
-* Folositi scriptul run_tests.sh.
-* Schimbați înainte de a îl rula variabila PYTHON din interiorul lui cu path-ul de pe sistemul vostru
-* Fișierele de input și output-referință se află în directorul tests/
-   * tot în acest director se generează și fisierul output al rulării temei folosind test.py
-* Pentru a verifica partea de code-style, trebuie să aveți instalat pylint
-   * am oferit în schelet fișierul pylintrc cu configurarea acestui tool
-   * puteți da comanda pylint pe sursele voastre sau să decomentați linia pentru pylint din scriptul run_tests.sh
+***Implementation details***
+* Some of the most important elements used in constructing the Marketplace methods logic are:
+    * dictionaries used to store data regarding the products on the market (more specifically, defaultdicts from
+    the collections module) and Python lists
+    * synchronization mechanisms in the form of Locks, imported from the threading module
+* By using these elements, synchronization is achieved. The Python data structures are mostly atomic in nature,
+due to the usage of GIL (Global Interpreter Lock) and, where it is needed (for example incremental operations),
+locks are used to ensure synchronization.
 
-Directorul test-gen conține scripturi pentru generarea testelor.
-
-* README_TESTS - descrie formatul json al fișierelor de intrare
-* test_generator.py - generează fișierele aferente unui test
-* test_utils.py - constante utilizate în test_generator
-* generate_tests.sh - generează cele 10 teste oferite în schelet și pentru care se va oferi punctajul temei
-
-Puteți să testați tema și pe teste proprii create folosind scriptul test_generator.py
-
-Informații despre conținutul fișierelor de intrare/ ieșire se regăsesc [aici](https://bitbucket.org/ASC-admin/asc/src/master/assignments/1-marketplace/skel/test-gen/README_TESTS.md).
+***Resources and other observations***
+* More info regarding the GIL can be found in these articles:
+    * [What is the Python Global Interpreter Lock (GIL)?](https://realpython.com/python-gil/)
+    * [Grok the GIL: How to write fast and thread-safe Python](https://opensource.com/article/17/4/grok-gil)
+* In short, the GIL is used to run programs that use multi-threading in a single-thread mode, in order to have
+backwards compatibility with the underlying C and C++ modules used (when using the CPython Compiler).
+Other compilers, such as IronPython or Jython, don't use the GIL in their implementation.
+* The GitHub repo of this project can be found [here](https://github.com/RaduBPavel/Parallel-Marketplace).
