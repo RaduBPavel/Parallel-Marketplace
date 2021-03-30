@@ -7,7 +7,7 @@ March 2021
 """
 
 from threading import Thread
-
+import time
 
 class Consumer(Thread):
     """
@@ -25,13 +25,33 @@ class Consumer(Thread):
         :param marketplace: a reference to the marketplace
 
         :type retry_wait_time: Time
-        :param retry_wait_time: the number of seconds that a producer must wait
+        :param retry_wait_time: the number of seconds that a consumer must wait
         until the Marketplace becomes available
 
         :type kwargs:
         :param kwargs: other arguments that are passed to the Thread's __init__()
         """
-        pass
+        Thread.__init__(self, **kwargs)
+        self.carts = carts
+        self.marketplace = marketplace
+        self.retry_wait_time = retry_wait_time
+        self.operations = {'add': self.marketplace.add_to_cart,
+                            'remove': self.marketplace.remove_from_cart}
 
     def run(self):
-        pass
+        for cart in self.carts:
+            cart_id = self.marketplace.new_cart()
+
+            for action in cart:
+                action_type, product, quantity = action['type'], action['product'], action['quantity']
+
+                while quantity > 0:
+                    return_code = self.operations[action_type](cart_id, product)
+
+                    if return_code:
+                        quantity -= 1
+                    else:
+                        time.sleep(self.retry_wait_time)
+
+            for item in self.marketplace.place_order(cart_id):
+                print('{} bought {}'.format(self.name, item))
